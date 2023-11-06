@@ -75,18 +75,35 @@ fn main() {
             println!("Task {} deleted.", id);
         },
         Command::List => {
+            println!(); 
+            println!();
+            print_welcome_message(); 
             println!();
             println!();
-            print_welcome_message();
-            println!();
-            println!();
-            println!("{:<5} | {:<20} | {:<15} | {:<10}", "ID", "Description", "Time Estimate", "Completed");
-            println!("{:-<5}+{:-<22}+{:-<17}+{:-<12}", "-", "-", "-", "-"); // Print a separator line
-            for task in &tasks {
-                let completed_text = if task.completed { "Yes" } else { "No" };
-                println!("{:<5} | {:<20} | {:<15} | {:<10}", task.id, task.description, task.time_estimate, completed_text);
-        }
-},
+            let max_id_width = tasks.iter().map(|task| task.id.to_string().len()).max().unwrap_or(2);
+            let max_description_width = tasks.iter().map(|task| task.description.len()).max().unwrap_or(11);
+            let max_time_estimate_width = tasks.iter().map(|task| task.time_estimate.len()).max().unwrap_or(13);
+            let completed_width = "Completed".len();
+
+            println!("{:<id_width$} | {:<description_width$} | {:<time_estimate_width$} | {:completed_width$}",
+                 "ID", "Description", "Time Estimate", "Completed",
+                id_width=max_id_width +1, description_width=max_description_width +1,
+                time_estimate_width=max_time_estimate_width +1, completed_width=completed_width +1);
+    
+            println!("{:-<id_width$}-+-{:-<description_width$}-+-{:-<time_estimate_width$}-+-{:-<completed_width$}",
+                "", "", "", "", 
+                id_width=max_id_width +1, description_width=max_description_width +1,
+                time_estimate_width=max_time_estimate_width +1, completed_width=completed_width +1);
+
+        for task in &tasks {
+            let completed_text = if task.completed { "Yes" } else { "No" };
+            println!("{:<id_width$} | {:<description_width$} | {:<time_estimate_width$} | {:<completed_width$}",
+                 task.id, task.description, task.time_estimate, completed_text,
+                 id_width=max_id_width +1, description_width=max_description_width +1,
+                 time_estimate_width=max_time_estimate_width +1, completed_width=completed_width +1);
+            }
+        },
+
     }
 
     save_tasks(&tasks).expect("Failed to save tasks");
