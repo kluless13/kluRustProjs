@@ -1,5 +1,7 @@
 extern crate serde_json;
 
+use rand::seq::SliceRandom; // For random selection from a slice
+
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -7,27 +9,44 @@ struct Task {
     id: usize,
     description: String,
     completed: bool,
+    time_estimate: String,
 }
 
+#[derive(Debug)]
 enum Command {
-    Add(String),
+    Add(String, String),
     Complete(usize),
     Delete(usize),
     List,
+}
+
+fn print_welcome_message() {
+    let messages = [
+        "Welcome kluless, let's have a productive day!",
+        "Welcome kluless, let's tackle today's challenges!",
+        "Welcome kluless, time to turn goals into achievements!",
+        "Welcome kluless, ready to check off some tasks?",
+        "Welcome kluless, kill it.",
+        "Welcome kluless, you're creating change.",
+    ];
+
+    let mut rng = rand::thread_rng();
+    let message = messages.choose(&mut rng).unwrap();
+    println!("{}", message);
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     let command = match args.as_slice() {
-        // Note: We're using `args[2..].join(" ")` to correctly get the description as one string.
-        [_, cmd, desc, ..] if cmd == "add" => Command::Add(desc.to_string()),
-
+        [_, cmd, desc, time_estimate, ..] if cmd == "add" => {
+            Command::Add(desc.to_string(), time_estimate.to_string())
+        }
         [_, cmd, id] if cmd == "complete" => Command::Complete(id.parse().unwrap()),
         [_, cmd, id] if cmd == "delete" => Command::Delete(id.parse().unwrap()),
         [_, cmd] if cmd == "list" => Command::List,
         _ => {
-            eprintln!("Invalid command!");
+            eprintln!("Usage: add <description> <time_estimate> | complete <id> | delete <id> | list");
             return;
         }
     };
@@ -35,26 +54,39 @@ fn main() {
     let mut tasks = load_tasks().unwrap_or_else(|_| Vec::new());
 
     match command {
-        Command::Add(description) => {
-            tasks.push(Task { 
-                id: tasks.len() + 1, 
-                description, 
-                completed: false 
-            });
-        },
+    Command::Add(description, time_estimate) => {
+        let task = Task {
+            id: tasks.len() + 1,
+            description: description.clone(), // Clone the description here
+            completed: false,
+            time_estimate,
+        };
+        tasks.push(task);
+        println!("Task added: {}", description);       
+    },
         Command::Complete(id) => {
             if let Some(task) = tasks.iter_mut().find(|task| task.id == id) {
                 task.completed = true;
+                println!("Task {} marked as completed.", id);
             }
         },
         Command::Delete(id) => {
             tasks.retain(|task| task.id != id);
+            println!("Task {} deleted.", id);
         },
         Command::List => {
+            println!();
+            println!();
+            print_welcome_message();
+            println!();
+            println!();
+            println!("{:<5} | {:<20} | {:<15} | {:<10}", "ID", "Description", "Time Estimate", "Completed");
+            println!("{:-<5}+{:-<22}+{:-<17}+{:-<12}", "-", "-", "-", "-"); // Print a separator line
             for task in &tasks {
-                println!("{:?}", task);
-            }
+                let completed_text = if task.completed { "Yes" } else { "No" };
+                println!("{:<5} | {:<20} | {:<15} | {:<10}", task.id, task.description, task.time_estimate, completed_text);
         }
+},
     }
 
     save_tasks(&tasks).expect("Failed to save tasks");
@@ -66,8 +98,9 @@ fn load_tasks() -> Result<Vec<Task>, std::io::Error> {
     Ok(tasks)
 }
 
-fn save_tasks(tasks: &Vec<Task>) -> Result<(), std::io::Error> {
+fn save_tasks(tasks: &[Task]) -> Result<(), std::io::Error> {
     let data = serde_json::to_string(tasks)?;
     std::fs::write("tasks.json", data)?;
     Ok(())
 }
+
