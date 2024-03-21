@@ -22,12 +22,12 @@ enum Command {
 
 fn print_welcome_message() {
     let messages = [
-        "Welcome kluless, let's have a productive day!",
-        "Welcome kluless, let's tackle today's challenges!",
-        "Welcome kluless, time to turn goals into achievements!",
-        "Welcome kluless, ready to check off some tasks?",
-        "Welcome kluless, kill it.",
-        "Welcome kluless, you're creating change.",
+        "Welcome team Oranj, let's have a productive day!",
+        "Welcome team Oranj, let's tackle today's challenges!",
+        "Welcome team Oranj, time to turn goals into achievements!",
+        "Welcome team Oranj, ready to check off some tasks?",
+        "Welcome team Oranj, kill it.",
+        "Welcome team Oranj, you're creating change.",
     ];
 
     let mut rng = rand::thread_rng();
