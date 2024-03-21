@@ -107,6 +107,7 @@ fn main() {
     }
 
     save_tasks(&tasks).expect("Failed to save tasks");
+    save_tasks_to_markdown(&tasks).expect("Failed to save tasks to Markdown");
 }
 
 fn load_tasks() -> Result<Vec<Task>, std::io::Error> {
@@ -118,6 +119,21 @@ fn load_tasks() -> Result<Vec<Task>, std::io::Error> {
 fn save_tasks(tasks: &[Task]) -> Result<(), std::io::Error> {
     let data = serde_json::to_string(tasks)?;
     std::fs::write("tasks.json", data)?;
+    Ok(())
+}
+
+fn save_tasks_to_markdown(tasks: &[Task]) -> Result<(), std::io::Error> {
+    let mut content = String::new();
+    content.push_str("| ID | Description | Time Estimate | Completed |\n");
+    content.push_str("|----|-------------|---------------|-----------|\n");
+    for task in tasks {
+        let completed_text = if task.completed { "Yes" } else { "No" };
+        content.push_str(&format!(
+            "| {} | {} | {} | {} |\n",
+            task.id, task.description, task.time_estimate, completed_text
+        ));
+    }
+    std::fs::write("tasks.md", content)?;
     Ok(())
 }
 
