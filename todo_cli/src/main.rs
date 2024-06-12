@@ -12,14 +12,6 @@ struct Task {
     designation: String,
 }
 
-#[derive(Debug)]
-enum Command {
-    Add(String, String, String), // Description, Time Estimate, Designation
-    Complete(usize),
-    Delete(usize),
-    List(Option<String>), // Optionally filter by designation
-}
-
 fn print_welcome_message(designation: Option<&String>) {
     let messages = [
         "Let's have a productive day!",
@@ -109,7 +101,6 @@ fn save_tasks(tasks: &[Task]) -> Result<(), std::io::Error> {
     let data = serde_json::to_string(tasks)?;
     fs::write("tasks.json", data)
 }
-
 
 fn save_tasks_to_markdown(tasks: &[Task]) -> Result<(), std::io::Error> {
     let mut content = String::new();
